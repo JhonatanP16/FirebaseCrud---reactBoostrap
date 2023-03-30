@@ -1,6 +1,7 @@
 import { async } from '@firebase/util'
 import React, { useContext } from 'react'
 import { Button, Stack, Table } from 'react-bootstrap'
+import { BsImageFill, BsPenFill, BsTrash } from "react-icons/bs";
 import { CrudContext } from '../context/CrudContext'
   const tableHead = {
     id:'#id',
@@ -51,8 +52,8 @@ const Tables = () => {
               <td>{user.gender}</td>
               <td>
                 <Stack direction='horizontal' gap={2}>
-                  <Button variant='primary' id={user.id} onClick={(e) => handleUpdate(e.target.id)}>Edit</Button>
-                  <Button variant='danger' id={user.id} onClick={(e) => handleDelete(e.target.id)}>Delete</Button>
+                  <Button variant='primary' id={user.id} onClick={(e) => handleUpdate(e.target.id)}><BsPenFill/></Button>
+                  <Button variant='danger' id={user.id} onClick={(e) => handleDelete(e.target.id)}><BsTrash/></Button>
                 </Stack>
               </td>
             </tr>
