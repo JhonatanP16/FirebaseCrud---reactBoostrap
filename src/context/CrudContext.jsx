@@ -7,7 +7,6 @@ export const CrudContext = createContext();
 const CrudContextProvider = ({children}) => {
     const [users,setUsers] = useState([]);
     const [onlyUser,setOnlyUser] = useState(null);
-    console.log(users);
     const userCollectionRef = collection(db,'users');
     
     const createUser = (inputs) => {

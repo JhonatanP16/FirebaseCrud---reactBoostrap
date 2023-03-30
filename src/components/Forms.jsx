@@ -5,24 +5,24 @@ import { BsImageFill } from "react-icons/bs";
 import { CrudContext } from '../context/CrudContext';
 import { storage } from '../firebase-config';
 import Alerts from './Alerts';
+const genderValues = ['Male','Female'];
 const Forms = () => {
   const {createUser,onlyUser,updateUser,getUsers} = useContext(CrudContext);
+  const initialState = {
+    name:'',
+    email:'',
+    gender:'',
+    img:'',
+  }
+  const [data,setData] = useState(initialState);
   const [file,setFile] = useState('');
-  const [name,setName] = useState('');
-  const [email,setEmail] = useState('');
-  const [gender,setGender] = useState('');
-  const [img,setImg] = useState('');
   const [per,setper] = useState(null);
   const [message,setMessage] = useState({err:false,msg:'',variant:''});
-   
-  const initialState = () => {
-    setName('');
-    setEmail('');
-    setGender('');
-    setFile('');
-    setImg('');
+
+  const handleChageInput = e => {
+    setData(prev=>({...prev,[e.target.name]: e.target.value}))
   }
-  
+
   useEffect(() => {
     const uploadFile = () =>{
       const name = new Date().getTime()+file.name;
@@ -47,7 +47,7 @@ const Forms = () => {
         },
         () => {
           getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-            setImg(downloadURL);
+            setData(prev => ({...prev,img:downloadURL}));
           });
         }
       );
@@ -58,10 +58,11 @@ const Forms = () => {
   const handleSubmit = async(e) => {
     e.preventDefault();
     try {
-      await createUser({name:name,email:email,gender:gender,img:img});
+      await createUser(data);
       setMessage({err:false,msg:'Add successfully!!',variant:'success'})
+      setData(initialState);
+      setFile('');
       getUsers();
-      initialState()
     } catch (error) {
       setMessage({err:true,msg:error.message,variant:'danger'})
     }
@@ -69,19 +70,20 @@ const Forms = () => {
   const handleEdit = async() => {
     const id = onlyUser?.id;
     try {
-      await updateUser(id,{name:name,email:email,gender:gender,img:img});
+      await updateUser(id,data);
       setMessage({err:false,msg:'Edit successfully!!',variant:'success'})
+      setData(initialState);
+      setFile('');
       getUsers();
-      initialState();
     } catch (error) {
       setMessage({err:true,msg:error.message,variant:'danger'})
     }
   }
+  
   useEffect(() => {
-    setName(onlyUser?.name || '');
-    setEmail(onlyUser?.email || '');
-    setGender(onlyUser?.gender || '');
-    setImg(onlyUser?.img || '');
+    if(onlyUser !== null){
+      setData(onlyUser && onlyUser);
+    }
   },[onlyUser])
 
   return (
@@ -96,12 +98,11 @@ const Forms = () => {
               <Form.Control 
               type='file' 
               id='file'
-              required
               style={{display:'none'}} 
               onChange={(e) => setFile(e.target.files[0])}/>
                {
                 onlyUser !== null ? (
-                  <img src={img} alt="" className='avatar' />
+                  <img src={data.img} alt="" className='avatar' />
                 ) : (
                   <img src={file 
                     ? URL.createObjectURL(file) 
@@ -118,28 +119,37 @@ const Forms = () => {
                 <Form.Control
                 type='text'
                 required
-                value={name}
+                name='name'
+                value={data.name}
                 placeholder='name user'
-                onChange={(e) => setName(e.target.value)}
+                onChange={handleChageInput}
                 />
             </Form.Group>
             <Form.Group className='mb-3'>
             <Form.Control
               type='text'
               required
-              value={email}
+              name='email'
+              value={data.email}
               placeholder='email user'
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={handleChageInput}
             />
             </Form.Group>
             <Form.Group className='mb-3'>
-            <Form.Control
-              required
-              type='text'
-              value={gender}
-              placeholder='gender user'
-              onChange={(e) => setGender(e.target.value)}
-            />
+            {
+              genderValues.map((gender,index) => (
+                <Form.Check
+                  key={index}
+                  inline
+                  name='gender'
+                  label={gender}
+                  type='radio'
+                  value={gender}
+                  checked={data.gender && data.gender.includes(gender)}
+                  onChange={handleChageInput}
+                />
+              ))
+            }
             </Form.Group>
             <Stack direction='horizontal' gap={4}>
               <Button 
